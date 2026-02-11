@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shadow of Classroom</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#050505;
+  color:white;
+  text-align:center;
+}
+
+h1{color:#ffcc00;}
+
+#menu,#game{
+  display:none;
+  padding:20px;
+}
+
+button{
+  padding:12px 20px;
+  border:none;
+  border-radius:8px;
+  background:#ffcc00;
+  font-size:16px;
+  margin:6px;
+  cursor:pointer;
+}
+
+#gameArea{
+  width:90vw;
+  max-width:600px;
+  height:60vh;
+  max-height:400px;
+  margin:auto;
+  background:#111;
+  border:2px solid #444;
+  position:relative;
+  overflow:hidden;
+}
+
+#player{
+  width:36px;
+  height:36px;
+  background:#00ffcc;
+  position:absolute;
+  border-radius:6px;
+  left:40px;
+  top:40px;
+}
+
+#ghost{
+  width:36px;
+  height:36px;
+  background:#ff4444;
+  position:absolute;
+  border-radius:50%;
+  display:none;
+}
+
+#hud{
+  margin:10px;
+  font-size:18px;
+}
+
+#controls{
+  margin-top:15px;
+}
+
+.ctrl{
+  width:60px;
+  height:60px;
+  font-size:22px;
+  background:#333;
+  color:white;
+  border-radius:50%;
+  border:none;
+  margin:3px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- MENU -->
+<div id="menu">
+  <h1>Shadow of Classroom</h1>
+  <p>Web Horror Game</p>
+  <button onclick="startGame()">เริ่มเล่น</button>
+</div>
+
+<!-- GAME -->
+<div id="game">
+
+  <h2>โรงเรียนกลางคืน</h2>
+
+  <div id="gameArea">
+    <div id="player"></div>
+    <div id="ghost"></div>
+  </div>
+
+  <div id="hud">
+    <div id="fearText">ความกลัว: 0%</div>
+  </div>
+
+  <!-- Mobile Controls -->
+  <div id="controls">
+    <div>
+      <button class="ctrl" onclick="move('up')">⬆️</button>
+    </div>
+    <div>
+      <button class="ctrl" onclick="move('left')">⬅️</button>
+      <button class="ctrl" onclick="move('down')">⬇️</button>
+      <button class="ctrl" onclick="move('right')">➡️</button>
+    </div>
+  </div>
+
+  <br>
+  <button onclick="backMenu()">ออก</button>
+
+</div>
+
+<script>
+
+const menu = document.getElementById("menu");
+const game = document.getElementById("game");
+const player = document.getElementById("player");
+const ghost = document.getElementById("ghost");
+const fearText = document.getElementById("fearText");
+const area = document.getElementById("gameArea");
+
+let x = 40;
+let y = 40;
+let fear = 0;
+let speed = 12;
+
+menu.style.display = "block";
+
+// เริ่มเกม
+function startGame(){
+  menu.style.display = "none";
+  game.style.display = "block";
+  resetGame();
+  spawnGhost();
+}
+
+// กลับเมนู
+function backMenu(){
+  game.style.display = "none";
+  menu.style.display = "block";
+}
+
+// รีเซ็ต
+function resetGame(){
+  x = 40;
+  y = 40;
+  fear = 0;
+  updatePlayer();
+  updateHUD();
+}
+
+// อัปเดต HUD
+function updateHUD(){
+  fearText.innerText = "ความกลัว: " + fear + "%";
+}
+
+// ขยับ (มือถือ)
+function move(dir){
+
+  if(dir==="up") y -= speed;
+  if(dir==="down") y += speed;
+  if(dir==="left") x -= speed;
+  if(dir==="right") x += speed;
+
+  limit();
+  updatePlayer();
+  checkGhost();
+}
+
+// ขยับ (คีย์บอร์ด)
+document.addEventListener("keydown", e=>{
+
+  if(game.style.display!=="block") return;
+
+  if(e.key==="ArrowUp") y -= speed;
+  if(e.key==="ArrowDown") y += speed;
+  if(e.key==="ArrowLeft") x -= speed;
+  if(e.key==="ArrowRight") x += speed;
+
+  limit();
+  updatePlayer();
+  checkGhost();
+});
+
+// จำกัดขอบเขต
+function limit(){
+
+  const maxX = area.clientWidth - 36;
+  const maxY = area.clientHeight - 36;
+
+  x = Math.max(0, Math.min(maxX, x));
+  y = Math.max(0, Math.min(maxY, y));
+}
+
+// อัปเดตตำแหน่ง
+function updatePlayer(){
+  player.style.left = x + "px";
+  player.style.top = y + "px";
+}
+
+// สุ่มผี
+function spawnGhost(){
+
+  ghost.style.display = "block";
+
+  let gx = Math.random() * (area.clientWidth - 36);
+  let gy = Math.random() * (area.clientHeight - 36);
+
+  ghost.style.left = gx + "px";
+  ghost.style.top = gy + "px";
+}
+
+// ตรวจระยะ
+function checkGhost(){
+
+  const px = player.offsetLeft;
+  const py = player.offsetTop;
+
+  const gx = ghost.offsetLeft;
+  const gy = ghost.offsetTop;
+
+  const dist = Math.hypot(px-gx, py-gy);
+
+  if(dist < 60){
+
+    fear += 2;
+    updateHUD();
+
+    if(fear >= 100){
+      alert("คุณโดนเงากลืนกิน!");
+      backMenu();
+    }
+  }
+}
+
+</script>
+
+</body>
+  </html>
